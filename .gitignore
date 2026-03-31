@@ -1,0 +1,28 @@
+# macOS system files
+.DS_Store
+
+# Python byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Temporary caches
+cache/
+notebooks/cache/
+.ipynb_checkpoints/
+
+# Course Materials (Do not push)
+Coursework instructions_26.pdf
+Lecture slides/
+
+# LaTeX auxiliary files (if you ever compile locally)
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.sync*
+*.fdb_latexmk
+*.fls
