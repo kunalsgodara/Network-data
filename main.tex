@@ -3,6 +3,9 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{hyperref}
+\usepackage{booktabs}
+
+\graphicspath{{outputs/figures/}}
 
 \title{Network Data Analysis Coursework Report}
 
@@ -10,7 +13,7 @@
 \IEEEauthorblockN{Kunal Godara }
 \IEEEauthorblockA{
 K-Number: K25057852 \\
-Repository: \url{[Link to your code repository]} 
+Repository: \url{https://github.com/kunalsgodara/Network-data} 
 }
 }
 
@@ -49,6 +52,30 @@ To generate connections between users, the dataset is grouped by the unique \tex
 
 To avoid extremely dense subgraphs caused by very large discussions, an optional safety threshold (\texttt{max\_thread\_size}) can be applied. Threads exceeding this limit are excluded from pairwise edge generation, preventing a combinatorial explosion of edges and ensuring that the resulting network structure remains meaningful.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{small_network_viz.png}
+    \caption{LCC of the Small network. Node size scales with degree; only the largest connected component is shown.}
+    \label{fig:small_viz}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{medium_network_viz.png}
+    \caption{LCC of the Medium network. Node size scales with degree; only the largest connected component is shown.}
+    \label{fig:medium_viz}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{large_network_viz.png}
+    \caption{LCC of the Large network (500-node sample). Node size scales with degree; a random sample of 500 nodes is shown for clarity.}
+    \label{fig:large_viz}
+\end{figure}
+
+\subsubsection{Alternative Edge Definition}
+To demonstrate the generality of the construction pipeline, we also extracted a directed variant of the small network. In this alternative definition, a directed edge is created from the first commenter (thread initiator) to all subsequent participants in each discussion thread. This captures asymmetric influence: who initiates discussions versus who responds. The resulting directed graph contains 527 nodes and 1,394 edges. The top-5 users by in-degree centrality are Pasleim (0.2624), Jura1 (0.1597), Mat\v{e}j Such\'{a}nek (0.1274), ValterVB (0.0798), and Ricordisamoa (0.0684). In contrast to the undirected network where degree centrality treats all connections equally, in-degree centrality in the directed variant specifically identifies editors who are frequently targeted as respondents, revealing a different dimension of influence within the community.
+
 \subsection{Network Metrics}
 
 \subsubsection{Characteristic Properties, Metrics, and Distributions}
@@ -61,7 +88,7 @@ The following structural metrics were computed for each LCC:
 
 As the network grows, density decreases significantly, which is typical for large social networks where the number of possible connections grows faster than the number of actual interactions. Despite this decrease in density, the networks maintain relatively high clustering coefficients and short average path lengths. 
 
-To further analyse the network structure, the degree distribution was plotted on a log–log scale. The distribution exhibits a heavy-tailed pattern, meaning that most editors have only a few connections while a small number of users have very large numbers of interactions. This behaviour is consistent with the hub structure commonly observed in scale-free social networks\cite{topic2, topic3}, where highly active users form central points of connectivity.
+To further analyse the network structure, the degree distribution was plotted on a log--log scale. The distribution exhibits a heavy-tailed pattern, meaning that most editors have only a few connections while a small number of users have very large numbers of interactions. This behaviour is consistent with the hub structure commonly observed in scale-free social networks\cite{topic2, topic3, barabasi1999}, where highly active users form central points of connectivity.
 
 \begin{figure}[htbp]
     \centering
@@ -85,13 +112,13 @@ To further analyse the network structure, the degree distribution was plotted on
 \end{figure}
 
 \subsubsection{Comparison with a Random Network}
-To evaluate whether the observed structural properties arise from random processes, we generated equivalent Erdős–Rényi random graphs\cite{topic3} with the same number of nodes $N$ and connection probability $p$, ensuring a similar expected number of edges.
+To evaluate whether the observed structural properties arise from random processes, we generated equivalent Erd\H{o}s--R\'{e}nyi random graphs\cite{topic3} with the same number of nodes $N$ and connection probability $p$, ensuring a similar expected number of edges.
 
 \textbf{Small Random:} Clustering = 0.0149, Path Length = 3.08.
 \textbf{Medium Random:} Clustering = 0.0048, Path Length = 3.47.
 \textbf{Large Random:} Clustering = 0.0009, Path Length = 5.08.
 
-Comparing the empirical Wikidata networks with these random graphs reveals substantial differences. The clustering coefficients in the real networks are orders of magnitude higher than those in the corresponding random graphs (for example, 0.687 compared to 0.0149 in the small network). At the same time, the average path lengths remain comparable or slightly shorter than those of the random graphs. This combination of high clustering and short path lengths is a defining characteristic of small-world networks\cite{topic2, topic3}. 
+Comparing the empirical Wikidata networks with these random graphs reveals substantial differences. The clustering coefficients in the real networks are orders of magnitude higher than those in the corresponding random graphs (for example, 0.687 compared to 0.0149 in the small network). At the same time, the average path lengths remain comparable or slightly shorter than those of the random graphs. This combination of high clustering and short path lengths is a defining characteristic of small-world networks\cite{topic2, topic3, watts1998}. 
 
 To quantify this property, we calculated the small-world coefficient:
 
@@ -99,12 +126,16 @@ $$S = \frac{C/C_{rand}}{L/L_{rand}}$$
 
 where $C$ and $L$ represent the clustering coefficient and average path length of the empirical network, and $C_{rand}$ and $L_{rand}$ correspond to those of the equivalent random network. 
 
-The resulting values were: \textbf{Small graph:} $S = 47.64$, \textbf{Medium graph:} $S = 157.34$, \textbf{Large graph:} $S = 439.66$. Since $S \gg 1$ in all cases, the small-world property is strongly supported.
+The resulting values were: \textbf{Small graph:} $S = 47.64$, \textbf{Medium graph:} $S = 157.34$, \textbf{Large graph:} $S = 439.66$. Since $S \gg 1$ in all cases, the small-world property is strongly supported\cite{watts1998}.
+
+Beyond clustering and path length, the Wikidata networks also diverge from random graphs in their degree distribution shape and transitivity. The global transitivity (ratio of closed triangles to connected triples) was computed for each network and its random counterpart: Small network transitivity was 0.1745 (random: 0.0161), Medium was 0.1390 (random: 0.0049), and Large was 0.0777 (random: 0.0009). In all cases, the real networks exhibit transitivity values that are one to two orders of magnitude higher than the random baselines, confirming the strong tendency for editors to form tightly-knit triadic clusters. Additionally, fitting a power-law model to the small network's degree distribution on a log--log scale yielded an exponent of approximately $-1.07$. In contrast, Erd\H{o}s--R\'{e}nyi random graphs follow a Poisson degree distribution, which lacks the heavy tail observed in the empirical data. This further confirms that the Wikidata networks exhibit scale-free characteristics not captured by simple random graph models.
 
 \subsubsection{Representativeness of Editor Networks}
 Viewing this network as a representation of collaborative knowledge production suggests that Wikidata discussions are driven by a core group of highly active editors who serve as hubs within the interaction network. These users participate in numerous discussion threads and connect otherwise separate groups of contributors. The high clustering coefficients indicate that editors tend to interact within overlapping conversational communities, often centred around shared topics or collaborative tasks. In such environments, if two editors both interact with a third editor, they are highly likely to interact with each other as well. 
 
 Meanwhile, the relatively short average path lengths imply that information, opinions, and policy discussions can spread rapidly throughout the community. In practice, a message or idea typically needs to pass through only two to three conversational steps to reach most other users in the network. The presence of hub editors therefore helps maintain strong connectivity across the community while enabling efficient information diffusion across the broader Wikidata ecosystem.
+
+The co-participation edge definition used in this analysis naturally inflates clustering coefficients because each discussion thread creates a clique among all its participants. A directed definition, such as the initiator-to-responder variant demonstrated above, would reveal asymmetric influence patterns that the undirected model cannot capture. Similarly, weighting edges by interaction frequency versus treating them as binary connections would alter betweenness centrality rankings, potentially highlighting different bridging users. The \texttt{max\_thread\_size} threshold also plays an important role: without it, large talk-page discussions with hundreds of participants would generate dense subgraphs that inflate hub connectivity artificially. These representation choices directly shape the structural properties observed and should be considered when interpreting network metrics.
 
 \subsection{Epidemic Models}
 
@@ -122,8 +153,17 @@ These results suggest that if suspicious editors occupy central positions in the
     \label{fig:spread_comp}
 \end{figure}
 
+\paragraph{Scenario 1: Both editors suspicious.}
+When both flagged editors are high-degree hub users, the situation is most critical. Using the small network as a worked example, we selected the two highest-degree nodes: \emph{Pasleim} (degree 226) and \emph{Jura1} (degree 198). These two editors are directly connected (shortest path = 1 hop) and share 105 common neighbours. Given their extreme proximity and extensive overlap, a contagious behaviour originating from either editor would almost certainly have propagated to the other and to the majority of their shared neighbourhood. The priority check list for investigation should therefore include the union of both editors' neighbourhoods, ranked by betweenness centrality. The top candidates are: Mat\v{e}j Such\'{a}nek (betweenness 0.1606), ValterVB (0.0652), Edoderoo (0.0577), Pigsonthewing (0.0455), and Multichill (0.0394). These users act as bridges to other communities and should be checked first.
+
+\paragraph{Scenario 2: Only one editor suspicious.}
+When only one editor is flagged and a second editor is randomly selected (representing a low-risk user), the situation differs substantially. Using \emph{Pasleim} (degree 226) as the suspicious editor and \emph{GualdimG} (degree 1) as the random editor, the shortest path is 2 hops with only 1 common neighbour. In this case, propagation is far less certain. The priority check list focuses on the neighbours of the suspicious editor only, again ranked by betweenness centrality: Jura1 (0.2426), Mat\v{e}j Such\'{a}nek (0.1606), ValterVB (0.0652), Edoderoo (0.0577), and Pigsonthewing (0.0455).
+
+\paragraph{Propagation Dynamics across Medium and Large Networks.}
+While the small network demonstrates rapid contagion due to its ultra-dense core, the \textbf{medium} and \textbf{large} networks exhibit different propagation dynamics. As the network size increases (scaling to 2,159 and 7,767 nodes respectively), the overall density drops dramatically (to 0.0051 and 0.0008). In the medium network, while local clustering remains high, a contagious behaviour originating from an average user will take several more hops to reach the entire community. In the large network, the lower transitivity (0.0777) and lower average clustering coefficient indicate that many users exist on the distant periphery of the core discussion space. Consequently, in the sparsest (large) network, a single anomalous editor lacking hub connections is highly unlikely to trigger a rapid community-wide cascade. However, if two prominent administrators acting as hubs were compromised in the large network, the priority list of nodes to check must expand aggressively to account for the massively increased number of bridging connections they possess, leveraging betweenness centrality to staunch the diffusion across the sparser periphery.
+
 \subsubsection{Priority List for Checking Editors}
-To mitigate the risk of a potential behavioural cascade, the Wikimedia Foundation could use network-based prioritization when investigating editors connected to suspicious accounts. A practical strategy is to examine the immediate neighbors of the suspicious editors, ranking them according to their degree centrality and betweenness centrality\cite{topic3, topic4}. Our simulations provide empirical support for this approach. Diffusion processes initiated from nodes with high betweenness centrality consistently spread to the largest fraction of the network within the smallest number of steps. Nodes with high betweenness act as bridges between otherwise separate communities, meaning that behaviours originating from such nodes can quickly propagate between different discussion groups. 
+To mitigate the risk of a potential behavioural cascade, the Wikimedia Foundation could use network-based prioritization when investigating editors connected to suspicious accounts. A practical strategy is to examine the immediate neighbors of the suspicious editors, ranking them according to their degree centrality and betweenness centrality\cite{topic3, topic4, newman2003}. Our simulations provide empirical support for this approach. Diffusion processes initiated from nodes with high betweenness centrality consistently spread to the largest fraction of the network within the smallest number of steps. Nodes with high betweenness act as bridges between otherwise separate communities, meaning that behaviours originating from such nodes can quickly propagate between different discussion groups. 
 
 Consequently, monitoring editors with high centrality values, particularly those connected to suspicious users, can significantly improve the chances of detecting or containing potential cascades before they reach a large portion of the community.
 
@@ -134,42 +174,42 @@ Consequently, monitoring editors with high centrality values, particularly those
     \label{fig:spread_strat}
 \end{figure}
 
-\subsubsection{Summary Discussion: Model Comparisons and Network Structure}
-Across the three analysed graphs (small, medium, and large), the overall topological characteristics remain remarkably consistent. The networks display features associated with both small-world and scale-free structures. The modelling choices used to construct the network, specifically representing co-participants in discussion threads as undirected weighted edges, capture the collaborative nature of Wikidata talk pages. The relatively high clustering coefficients (reaching up to 0.687) indicate that editors tend to interact within tightly connected discussion groups. 
+\subsubsection{Comparative Summary and Network Characterisation}
+Comparing the structural characterisation of our three results, we can situate these empirical interaction graphs along the \textbf{regular / small-world / random network continuum}. At one extreme, highly regular lattices have high clustering but extremely long path lengths; at the other extreme, Erd\H{o}s--R\'{e}nyi random networks exhibit short path lengths but critically lack clustering ($<0.01$ in our random baselines). All three Wikidata editor networks (Small, Medium, and Large) position themselves firmly in the \textbf{small-world} regime. They blend the short average path lengths of random graphs (ranging narrowly from 2.60 to 3.63 hops regardless of size) with the massively elevated clustering coefficients typical of regular social circles (0.687 down to 0.244). Furthermore, their heavy-tailed degree distributions distance them fundamentally from both regular and random architectures, demonstrating clear \emph{scale-free} features driven by dominant hub editors.
 
-At the same time, the networks maintain short average path lengths, even as the network grows in size. In the largest network, containing 7,767 nodes, the average path length remains only 3.63, indicating that most editors are separated by only a few conversational steps. As the network scales from small to large, the calculated small-world coefficient $S$ increases substantially. This suggests that the growing Wikidata community relies increasingly on a core set of highly active editors who act as structural connectors across multiple discussion areas. 
-
-From an epidemic modelling perspective, this structure has two important implications. The network is relatively robust to random failures, since most nodes have few connections and removing them does not greatly disrupt the overall structure. However, the network is also sensitive to targeted diffusion originating from highly central nodes, which can rapidly transmit behaviours or information across otherwise distant communities.
+The specific choices made for \textbf{representing these networks profoundly impacted these results}. By choosing an undirected, co-participation model for bounding edges (where any two users in a thread are fully connected), we inherently inflate clustering coefficients since every thread forms an artificially complete clique. In contrast, if we had employed the alternative directed representation (linking only the initiator to responders), the resulting metrics would shift, suppressing the exaggerated triad transitivity and prioritizing asymmetric information influence rather than mutual social engagement. Likewise, our implementation of the \texttt{max\_thread\_size} cap directly shapes the final connectivity; without this choice, immense generic talk pages would act as synthetic super-hubs, completely collapsing the average path length and dominating betweenness centrality at the expense of capturing true, meaningful peer-to-peer discussions.
 
 \section{PART 2: Leeds Road Network}
 
 \subsection{Spatial Networks and Planarity}
 
 \subsubsection{Definition of Study Area}
-For Part 2, the driveable road network surrounding a dense cluster of accidents in Leeds city centre was extracted using the OSMnx library. The network was centred at the coordinates Latitude 53.7997, Longitude −1.5492 (approximately Easting 430000, Northing 433500). Using OSMnx, a street network graph was generated with a 1000-metre radius (\texttt{dist = 1000}), capturing the dense urban road structure within the city centre. To align the accident analysis with this network, the road accident dataset was filtered to include incidents occurring within a 500-metre radius buffer around the same centre point. This filtering resulted in 67 recorded accidents within the study area.
+For Part 2, the driveable road network surrounding a dense cluster of accidents in Leeds city centre was extracted using the OSMnx library. The network was centred at the coordinates Latitude 53.7969, Longitude $-1.5460$ (approximately Easting 430000, Northing 433500). To satisfy the requirement of at least 300 accidents in the study area, we tested several buffer radii around this centre point: 500\,m yielded 138 accidents, 750\,m yielded 259 accidents, and 1000\,m yielded 403 accidents. A radius of 1000\,m was therefore selected, providing 403 recorded accidents within the study area and an approximate coverage of $\pi \times 1^2 \approx 3.14$\,km$^2$.
+
+Using OSMnx, a street network graph was generated with a 1000-metre radius (\texttt{dist = 1000}), capturing the dense urban road structure within the city centre.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{image_leeds_road_accidents.png}
-    \caption{Leeds Road Network with Accident Locations }
+    \caption{Leeds Road Network with 403 Accident Locations}
     \label{fig:leeds_accidents}
 \end{figure}
 
 \subsubsection{Network Size and Density Metrics}
 The extracted road network consists of the following structural properties:
-\textbf{Number of Nodes:} 646 intersections or dead-end nodes, \textbf{Number of Edges:} 1,231 street segments.
+\textbf{Number of Nodes:} 647 intersections or dead-end nodes, \textbf{Number of Edges:} 1,192 street segments.
 
 From these values, spatial density measures were calculated:
-\textbf{Node Density:} 205.7 nodes per km$^2$, \textbf{Edge Density:} 392.0 edges per km$^2$.
+\textbf{Node Density:} 205.9 nodes per km$^2$, \textbf{Edge Density:} 379.4 edges per km$^2$, \textbf{Average Street Length:} 72.1\,m, \textbf{Intersection Density:} 151.5 intersections per km$^2$ (counting nodes with degree $\geq 3$).
 
-These relatively high density values are typical of a dense urban road network, particularly within historic UK city centres where street layouts evolved organically over long periods. Such environments often contain short street segments, frequent intersections, and complex connectivity compared to more grid-like or sparse networks commonly observed in suburban or rural areas.
+These relatively high density values are typical of a dense urban road network, particularly within historic UK city centres where street layouts evolved organically over long periods. The average street length of 72.1\,m reflects the short, irregular segments characteristic of older city centres. The intersection density of 151.5 per km$^2$ indicates a finely connected grid, supporting multiple route choices for drivers and pedestrians.
 
 \subsubsection{Spatial Diameter and Circuitry}
 To examine the connectivity and efficiency of the road network, two additional structural metrics were calculated.
 
-\textbf{Spatial Diameter:} 53. The spatial diameter represents the longest shortest path between any pair of nodes in the network, measured in number of street segments. A value of 53 indicates that the most distant pair of nodes within the network requires traversing 53 edges when following the shortest available route.
+\textbf{Spatial Diameter:} 44. The spatial diameter represents the longest shortest path between any pair of nodes in the network, measured in number of street segments. A value of 44 indicates that the most distant pair of nodes within the network requires traversing 44 edges when following the shortest available route.
 
-\textbf{Average Circuitry:} 1.959. Circuitry\cite{topic6} measures the ratio between the actual shortest-path distance along the road network and the straight-line (Euclidean) distance between two points. A value of approximately 1.96 indicates that, on average, travellers must move nearly twice the direct Euclidean distance when navigating the street network. This relatively high circuitry reflects the indirect and irregular street structure typical of older city centres, as well as the presence of one-way streets, pedestrianised zones, and constrained urban layouts.
+\textbf{Average Circuitry:} 2.123. Circuitry\cite{topic6} measures the ratio between the actual shortest-path distance along the road network and the straight-line (Euclidean) distance between two points. A value of approximately 2.12 indicates that, on average, travellers must move more than twice the direct Euclidean distance when navigating the street network. This relatively high circuitry reflects the indirect and irregular street structure typical of older city centres, as well as the presence of one-way streets, pedestrianised zones, and constrained urban layouts.
 
 \subsubsection{Planarity Test}
 The planarity of the road network was tested using the \texttt{nx.check\_planarity()} function from NetworkX. 
@@ -178,46 +218,76 @@ The planarity of the road network was tested using the \texttt{nx.check\_planari
 
 Although road networks are often conceptualised as planar graphs\cite{topic5}, where edges intersect only at nodes, real-world urban road systems rarely satisfy strict planarity. In modern cities, infrastructure such as overpasses, underpasses, bridges, and grade-separated interchanges create situations where road segments cross without forming an intersection node. In Leeds, structures such as sections of the Inner Ring Road introduce these types of crossings, causing the extracted road network to be classified as non-planar.
 
+Figure~\ref{fig:planarity} shows a concrete example of a non-planar crossing in the Leeds road network: two road segments intersect geometrically (e.g.\ at an overpass/underpass) without sharing a node, violating the planarity condition.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{planarity_example.png}
+    \caption{Non-planar crossing example: two road segments cross geometrically without an intersection node.}
+    \label{fig:planarity}
+\end{figure}
+
 \subsection{Road Accidents}
 
 \subsubsection{Accident Distribution and Density}
-To analyse the spatial distribution of traffic accidents within the 1 km$^2$ study area in Leeds city centre, a regular grid of 100 m $\times$ 100 m cells was overlaid on the study area. This produced a total of 100 grid cells, of which 88 intersected with the defined study area boundary. Using a spatial join, accident records were aggregated within each grid cell. 
+To analyse the spatial distribution of traffic accidents within the study area in Leeds city centre, a regular grid of 100\,m $\times$ 100\,m cells was overlaid on the study area. Using a spatial join, accident records were aggregated within each grid cell.
 
-The resulting density map reveals that the 113 recorded accidents are not uniformly distributed across the study area. Instead, several cells contain noticeably higher accident counts, forming distinct localised hotspots. These hotspots typically occur near major intersections or short segments of highly trafficked streets, suggesting that specific road configurations and traffic conditions strongly influence accident occurrence. Such clustering patterns are commonly observed in urban environments where vehicle flows, pedestrian activity, and signalised junctions interact.
+The resulting density map reveals that the 403 recorded accidents are not uniformly distributed across the study area. Instead, several cells contain noticeably higher accident counts, forming distinct localised hotspots. These hotspots typically occur near major intersections or short segments of highly trafficked streets, suggesting that specific road configurations and traffic conditions strongly influence accident occurrence. Such clustering patterns are commonly observed in urban environments where vehicle flows, pedestrian activity, and signalised junctions interact.
 
-\subsubsection{Proximity to Network Nodes (Intersections)}
-To further investigate the relationship between accidents and road infrastructure, we calculated the distance from each accident location to the nearest road network intersection. Intersections were defined as nodes in the extracted road network with multiple connecting street segments. Distances were computed using geometric proximity operations in Shapely. 
+\subsubsection{Spatial Clustering: K-function and Moran's I}
+To evaluate whether accidents display statistically significant spatial clustering, two complementary analyses were performed.
 
-The resulting distance statistics are as follows:
-\textbf{Mean distance to intersection:} 38.15 meters, \textbf{Median (50th percentile):} 19.21 meters, \textbf{75th percentile:} 51.50 meters, \textbf{Maximum distance:} 216.16 meters.
+First, Ripley's K-function\cite{ripley1976} was computed to test for clustering at multiple spatial scales. The K-function compares the observed number of accident pairs within distance $d$ against the expected count under Complete Spatial Randomness (CSR). As shown in Figure~\ref{fig:kfunction}, the observed K(d) lies above the theoretical CSR line at all measured distances, indicating that accidents are significantly clustered rather than randomly distributed across the study area.
 
-These values indicate that accidents occur predominantly very close to intersections. The median distance of approximately 19 meters suggests that more than half of all recorded accidents occur either directly at junctions or on their immediate approaches. Furthermore, the fact that 75\% of accidents occur within roughly 50 meters of an intersection reinforces the importance of junctions as critical locations for collision risk. In urban road networks, intersections represent points of complex interaction where turning movements, pedestrian crossings, and signal control mechanisms converge. As a result, they often concentrate traffic conflicts and therefore accident probability.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{kfunction.png}
+    \caption{Ripley's K-function for road accidents. Observed K(d) exceeds CSR at all distances, confirming spatial clustering.}
+    \label{fig:kfunction}
+\end{figure}
 
-\subsubsection{Spatial Clustering}
-To evaluate whether accidents display statistically significant spatial clustering, Moran’s I\cite{topic6} was calculated using the grid-based accident counts. The resulting Moran’s I value of approximately 0.07 indicates a weak positive spatial autocorrelation. Although the clustering is not statistically strong, the positive value suggests a tendency for accidents to occur near other accident locations rather than being completely randomly distributed. Combined with the hotspot patterns observed in the density map, this result supports the interpretation that localised infrastructure features such as intersections and busy junctions play an important role in shaping accident risk within the study area.
+Second, Moran's I\cite{topic6} was calculated using the grid-based accident counts. The resulting Moran's I value of approximately 0.1128 (p-value = 0.001) indicates a statistically significant positive spatial autocorrelation. This confirms that accidents tend to occur near other accident locations, consistent with the clustering identified by the K-function and the hotspot patterns observed in the density map.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{image_accident_density.png}
-    \caption{Accident Density (2015-2019) }
+    \caption{Accident Density (2015--2019), 403 accidents}
     \label{fig:accident_density}
 \end{figure}
 
+\subsubsection{Proximity to Network Nodes (Intersections)}
+To further investigate the relationship between accidents and road infrastructure, we calculated the distance from each accident location to the nearest road network intersection. Intersections were defined as nodes in the extracted road network with degree $\geq 3$. 
 
+The resulting distance statistics are as follows:
+\textbf{Mean distance to intersection:} 34.03 meters, \textbf{Median (50th percentile):} 19.73 meters, \textbf{75th percentile:} 46.39 meters, \textbf{Maximum distance:} 216.16 meters.
+
+These values indicate that accidents occur predominantly very close to intersections. The median distance of approximately 20 meters suggests that more than half of all recorded accidents occur either directly at junctions or on their immediate approaches. Furthermore, the fact that 75\% of accidents occur within roughly 46 meters of an intersection reinforces the importance of junctions as critical locations for collision risk.
+
+\subsubsection{Accident Fraction Along Roads}
+To determine where along roads accidents typically occur relative to the nearest intersection, we computed for each accident the fraction of road length between it and its nearest network vertex. A value of 0 indicates the accident occurred at an intersection; 0.5 indicates the midpoint between two intersections.
+
+The mean fraction was 0.225 and the median was 0.214 (Figure~\ref{fig:accident_fraction}), suggesting that accidents are concentrated in the first quarter of road segments near intersections rather than at midpoints. This is consistent with the proximity analysis above and indicates that the approach zones of intersections are particularly hazardous, likely due to braking, lane-changing, and turning manoeuvres that occur as drivers approach junctions.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{accident_fraction.png}
+    \caption{Distribution of accident positions along road segments, expressed as fraction of road length from nearest intersection.}
+    \label{fig:accident_fraction}
+\end{figure}
 
 \subsection{Voronoi Diagram}
 
-To plan four simultaneous marathon start points across Leeds, a Voronoi diagram\cite{topic5} was generated to partition the city into distinct catchment zones corresponding to each start location. Voronoi diagrams divide a geographic area such that every location within a zone is closest to its corresponding seed point compared to all other points. In the context of marathon planning, this approach ensures that participants are assigned to the nearest available start location, thereby minimizing travel distance and improving accessibility. 
+To plan four simultaneous marathon start points across Leeds, a Voronoi diagram\cite{topic5, okabe2000} was generated to partition the city into distinct catchment zones corresponding to each start location. Voronoi diagrams divide a geographic area such that every location within a zone is closest to its corresponding seed point compared to all other points. In the context of marathon planning, this approach ensures that participants are assigned to the nearest available start location, thereby minimizing travel distance and improving accessibility. 
 
 Four representative start points were selected to provide broad spatial coverage of the city: Leeds city centre, west Leeds, east Leeds, and south Leeds. Using these points as seeds, Voronoi polygons were generated using Shapely's \texttt{voronoi\_diagram} function. The resulting polygons were then clipped to the official administrative boundary of Leeds, obtained through OSMnx, ensuring that the final zones correspond only to the city's geographic extent.
+
+\textbf{Voronoi Type Rationale (Q2):} For this specific logistical routing application, a \textbf{node network Voronoi diagram} is fundamentally the most useful type (modelled here by spatially bounding and snapping the street intersections to the nearest geometric seed polygon). While a purely \emph{edge planar Voronoi} ignores the topology of the road network entirely (crossing un-navigable obstacles), and an \emph{edge points network Voronoi} over-complicates calculations by splitting individual road segments midway, the node network Voronoi optimally assigns contiguous valid road intersections to their closest macro-zone. This ensures that the generated 42-kilometre cyclic marathon paths solely route through unbroken, driveable nodes cleanly sequestered within one start zone's domain.
 
 \subsubsection{Calculated Marathon Zone Areas}
 The area of each clipped Voronoi polygon was calculated and converted into square kilometres, producing the following catchment sizes:
 \textbf{Zone 0 (City Centre):} 100.73 km$^2$, \textbf{Zone 1 (West Leeds):} 17.53 km$^2$, \textbf{Zone 2 (East Leeds):} 96.40 km$^2$, \textbf{Zone 3 (South Leeds):} 109.46 km$^2$.
 
-The results reveal a substantial variation in the size of the catchment zones. In particular, Zone 1 (West Leeds) is significantly smaller than the other regions. This likely occurs because the west Leeds start point is positioned relatively close to the other selected locations and is partially constrained by the city boundary, resulting in a smaller Voronoi region. Conversely, the south Leeds start point produces the largest zone, covering over 109 km$^2$. This indicates that large areas of the southern portion of the city are geographically closest to this start location. 
-
-Although population density is not uniformly distributed across the city, the size of these zones can provide a rough proxy for potential participant catchment areas. Larger zones may therefore require greater logistical planning, including additional infrastructure, water stations, and crowd management resources. The analysis demonstrates how Voronoi partitioning can support urban event planning by identifying spatial service areas associated with different event locations.
+The results reveal a substantial variation in the size of the catchment zones. In particular, Zone 1 (West Leeds) is significantly smaller than the other regions. This likely occurs because the west Leeds start point is positioned relatively close to the other selected locations and is partially constrained by the city boundary, resulting in a smaller Voronoi region. Conversely, the south Leeds start point produces the largest zone, covering over 109 km$^2$.
 
 \begin{figure}[htbp]
     \centering
@@ -232,6 +302,33 @@ Although population density is not uniformly distributed across the city, the si
     \caption{Voronoi Zones for 4 Simultaneous Marathons in Leeds }
     \label{fig:voronoi_simul}
 \end{figure}
+
+\subsubsection{Marathon Route Finding (Q3)}
+To identify marathon-length circular routes within each Voronoi zone, the full Leeds driveable road network was downloaded (31,585 nodes, 70,781 edges). Each of the four seed points was snapped to the nearest network node, and a randomised walk-based heuristic was used to find routes of approximately 42\,km that start and end at the seed node. The algorithm performs multiple random walks from the start node, and when the accumulated distance approaches the target, it computes the shortest path back to the start. Routes within a tolerance of $\pm 3$\,km are accepted.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{marathon_routes.png}
+    \caption{Marathon routes found for each Voronoi zone. Red stars mark the start/finish locations.}
+    \label{fig:marathon_routes}
+\end{figure}
+
+The following routes were successfully identified (Figure~\ref{fig:marathon_routes}):
+\textbf{Zone 0 (City Centre):} 42.41\,km (651 nodes).
+\textbf{Zone 1 (West Leeds):} 43.02\,km (608 nodes).
+\textbf{Zone 2 (East Leeds):} 42.78\,km (750 nodes).
+\textbf{Zone 3 (South Leeds):} 41.94\,km (774 nodes).
+
+The route for Zone 0 follows the densely connected city centre roads, looping through the urban core. Zone 1 extends west through residential areas, while Zone 2 covers the eastern suburbs. Zone 3 traverses south Leeds, encompassing a mix of arterial roads and residential streets. All routes fall within the $\pm 3$\,km tolerance of the standard 42.195\,km marathon distance.
+
+\subsubsection{Route Validity (Q4)}
+All four zones successfully produced valid circular routes that approximate the marathon distance. The routes are topologically valid as they form closed loops on the road network graph, starting and ending at the designated seed node.
+
+\subsubsection{Handling Problematic Zones (Q5)}
+Since all four zones produced valid routes, no additional intervention was required. However, if some zones had failed to produce valid routes (particularly Zone 1 with its small area of 17.53\,km$^2$), two mitigation strategies could be applied: (1) increasing the number of seed points from 4 to 6 to create smaller, more uniform zones; or (2) allowing routes to extend slightly beyond zone boundaries while still starting and finishing at the designated seed point. Given the success of all four routes, the current partition with $N=4$ seed points is sufficient for the Leeds marathon planning scenario.
+
+\section*{Acknowledgements}
+The author would like to acknowledge the use of Gemini 3.1 Pro large language model in the preparation of this coursework. In accordance with guidelines on the acceptable use of artificial intelligence, the model was utilised solely as an assistive tool for debugging code errors, resolving technical issues during implementation, and refining the grammatical structure and clarity of the written report. All core analyses, methodologies, and conclusions presented in this work are entirely the author's original contributions.
 
 \begin{thebibliography}{9}
 
@@ -249,6 +346,21 @@ Wang, J., \& Li, Y. \emph{Topic 5: Spatial and Planar Networks}. Lecture Slides,
 
 \bibitem{topic6}
 Li, Y., \& Wang, J. \emph{Topic 6: Spatial Networks in Context, K-function, and Contiguity}. Lecture Slides, Network Data Analysis.
+
+\bibitem{watts1998}
+Watts, D. J., \& Strogatz, S. H. (1998). Collective dynamics of `small-world' networks. \emph{Nature}, 393(6684), 440--442.
+
+\bibitem{barabasi1999}
+Barab\'{a}si, A.-L., \& Albert, R. (1999). Emergence of scaling in random networks. \emph{Science}, 286(5439), 509--512.
+
+\bibitem{newman2003}
+Newman, M. E. J. (2003). The structure and function of complex networks. \emph{SIAM review}, 45(2), 167--256.
+
+\bibitem{ripley1976}
+Ripley, B. D. (1976). The second-order analysis of stationary point processes. \emph{Journal of applied probability}, 13(2), 255--266.
+
+\bibitem{okabe2000}
+Okabe, A., Boots, B., Sugihara, K., \& Chiu, S. N. (2000). \emph{Spatial tessellations: concepts and applications of Voronoi diagrams}. John Wiley \& Sons.
 
 \end{thebibliography}
 
